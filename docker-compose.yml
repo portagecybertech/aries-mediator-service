@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 
 networks:
   mediator-network:
@@ -26,7 +26,7 @@ services:
       test: nc -zv localhost:2019 || exit -1
       interval: 3s
       timeout: 3s
-      start_period: 10s
+    
       retries: 5
 
   ngrok:
@@ -47,21 +47,22 @@ services:
       test: /bin/bash -c "</dev/tcp/ngrok/4040"
       interval: 3s
       timeout: 3s
-      start_period: 5s
+
       retries: 5
 
   mediator-controller:
     image: node:fermium
     # restart: unless-stopped
-    profiles:
-      - donotstart
+
+
     environment:
-      - PORT=${MEDIATOR_CONTROLLER_PORT:-3010}
+      - PORT=3010
       - CONTROLLER_ADMIN_API_KEY=${MEDIATOR_CONTROLLER_ADMIN_API_KEY}
-      - MEDIATOR_ADMIN_URL=${MEDIATOR_AGENT_ADMIN_URL-http://mediator:3002}
+      - MEDIATOR_ADMIN_URL=http://mediator:3002
       - MEDIATOR_ADMIN_API_KEY=${MEDIATOR_AGENT_ADMIN_API_KEY}
       - MEDIATOR_ALIAS=${MEDIATOR_ALIAS}
       - LOG_LEVEL=${LOG_LEVEL}
+
     volumes:
       - ./acapy/controller:/usr/src/controller:z
       - mediator-controller-data:/usr/src/controller/node_modules:z
@@ -91,24 +92,24 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      - ENV=${ENV:-local}
-      - POSTGRESQL_HOST=${POSTGRESQL_HOST:-db}
-      - POSTGRESQL_PORT=${POSTGRESQL_PORT:-5432}
-      - ACAPY_WALLET_STORAGE_CONFIG={"url":"${POSTGRESQL_HOST:-db}:${POSTGRESQL_PORT:-5432}","wallet_scheme":"DatabasePerWallet"}
-      - ACAPY_WALLET_STORAGE_CREDS={"account":"${POSTGRESQL_USER:-postgres}","password":"${POSTGRESQL_PASSWORD:-development}","admin_account":"${POSTGRESQL_ADMIN_USER:-postgres}","admin_password":"${POSTGRESQL_ADMIN_PASSWORD:-development}"}
-      - ACAPY_WALLET_NAME=${MEDIATOR_WALLET_NAME:-mediator}
-      - ACAPY_WALLET_KEY=${MEDIATOR_WALLET_KEY:-testing}
-      - MEDIATOR_AGENT_HTTP_IN_PORT=${MEDIATOR_AGENT_HTTP_IN_PORT:-3000}
-      - MEDIATOR_AGENT_WS_IN_PORT=${MEDIATOR_AGENT_WS_IN_PORT:-3001}
-      - MEDIATOR_AGENT_HTTP_ADMIN_PORT=${MEDIATOR_AGENT_HTTP_ADMIN_PORT:-3002}
-      - MEDIATOR_AGENT_ADMIN_MODE=${MEDIATOR_AGENT_ADMIN_MODE:-admin-api-key 7gdmVBiJalMj52Oum50yD8neu/nxmv3/DTWcZPyKZ4K2UdNNwSPKgg==}
-      - MEDIATOR_AGENT_LABEL=${MEDIATOR_AGENT_LABEL:-Mediator}
-      - MEDIATOR_URL=${MEDIATOR_URL:-}
-      - MEDIATOR_ENDPOINT_URL=${MEDIATOR_ENDPOINT_URL:-localhost}
-      - MEDIATOR_ARG_FILE=${MEDIATOR_ARG_FILE:-./configs/mediator-auto-accept.yml}
-      - MEDIATOR_CONTROLLER_WEBHOOK=${MEDIATOR_CONTROLLER_WEBHOOK:-http://mediator-controller:3010/webhooks}
+      - ENV=local
+      - POSTGRESQL_HOST=db
+      - POSTGRESQL_PORT=5432
+      - ACAPY_WALLET_STORAGE_CONFIG={"url":"db:5432","wallet_scheme":"DatabasePerWallet"}
+      - ACAPY_WALLET_STORAGE_CREDS={"account":"postgres","password":"development","admin_account":"postgres","admin_password":"development"}
+      - ACAPY_WALLET_NAME=mediator
+      - ACAPY_WALLET_KEY=testing
+      - MEDIATOR_AGENT_HTTP_IN_PORT=3000
+      - MEDIATOR_AGENT_WS_IN_PORT=3001
+      - MEDIATOR_AGENT_HTTP_ADMIN_PORT=3002
+      - MEDIATOR_AGENT_ADMIN_MODE=admin-api-key 7gdmVBiJalMj52Oum50yD8neu/nxmv3/DTWcZPyKZ4K2UdNNwSPKgg==
+      - MEDIATOR_AGENT_LABEL=Mediator
+      - MEDIATOR_URL=https://aggressive-negotiations.gatineau.credil.org
+      - MEDIATOR_ENDPOINT_URL=localhost
+      - MEDIATOR_ARG_FILE=./configs/mediator-auto-accept.yml
+      - MEDIATOR_CONTROLLER_WEBHOOK=http://mediator-controller:3010/webhooks
       - MEDIATOR_AGENT_ADMIN_API_KEY=${MEDIATOR_AGENT_ADMIN_API_KEY}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_LEVEL=INFO
     # ports: # Uncomment to access mediator outside of containers
     #   - ${MEDIATOR_AGENT_HTTP_ADMIN_PORT:-3002}:${MEDIATOR_AGENT_HTTP_ADMIN_PORT:-3002}
     #   - ${MEDIATOR_AGENT_HTTP_IN_PORT:-3000}:${MEDIATOR_AGENT_HTTP_IN_PORT:-3000}
@@ -125,7 +126,7 @@ services:
     image: postgres:10
     # restart: always
     environment:
-      POSTGRES_PASSWORD: ${POSTGRESQL_ADMIN_PASSWORD:-development}
+      POSTGRES_PASSWORD: development
     # ports: # Uncomment to access postgres outside of containers
     # - "5432:5432"
     networks:
