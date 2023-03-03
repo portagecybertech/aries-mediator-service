@@ -1,0 +1,1 @@
+--webhook-url ${MEDIATOR_CONTROLLER_WEBHOOK}
